@@ -5,9 +5,14 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import org.openqa.selenium.{By, Keys}
 import org.scalatest.time.Span
 import org.scalatest.time.Seconds
+import java.io.{File, PrintWriter}
 
 object scraper extends App with Chrome with Utils {
   implicitlyWait(Span(3, Seconds))
+
+  // create new file
+  // write csv header
+  results.write("companyName,jobTitle,location\n")
 
   go to ("https://glassdor.com")
 
@@ -54,11 +59,16 @@ object scraper extends App with Chrome with Utils {
 
     page = page + 1
   }
+
+  // close the file
+  results.close()
   
   println("DONE")
 }
 
 trait Utils {self: Chrome =>
+  // results will go here
+  val results = new PrintWriter(new File("results.csv"))
 
   // if some popup is open, close it
   def closePopupIfOneIsOpen = {
@@ -88,6 +98,8 @@ trait Utils {self: Chrome =>
       val location = element.attribute("data-job-loc").get
 
       println(s"$companyName,$location,$jobTitle")
+
+      results.write(s"$companyName,$location,$jobTitle\n")
     }
   }
 
